@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CorridorKey Studio</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   Design Tokens
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #0b0b0f;
+  --surface-1: #111116;
+  --surface-2: #19191f;
+  --surface-3: #222229;
+  --surface-4: #2c2c35;
+  --border: #28282f;
+  --border-subtle: #1f1f26;
+  --border-hover: #3a3a44;
+  --accent: #7c3aed;
+  --accent-hover: #8b5cf6;
+  --accent-glow: rgba(124, 58, 237, 0.18);
+  --accent-soft: rgba(124, 58, 237, 0.06);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --text-quaternary: #52525b;
+  --green: #34d399;
+  --green-bg: rgba(52, 211, 153, 0.1);
+  --green-border: rgba(52, 211, 153, 0.2);
+  --yellow: #fbbf24;
+  --yellow-bg: rgba(251, 191, 36, 0.1);
+  --red: #f87171;
+  --red-bg: rgba(248, 113, 113, 0.1);
+  --red-border: rgba(248, 113, 113, 0.2);
+  --blue: #60a5fa;
+  --blue-bg: rgba(96, 165, 250, 0.1);
+  --r: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Reset & Base
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  font-size: 14px;
+}
+a { color: var(--accent-hover); text-decoration: none; }
+a:hover { text-decoration: underline; }
+::selection { background: var(--accent); color: white; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Layout
+   ═══════════════════════════════════════════════════════════════ */
+.app { max-width: 940px; margin: 0 auto; padding: 24px 20px 100px; }
+@media (min-width: 768px) { .app { padding: 40px 32px 100px; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   Header
+   ═══════════════════════════════════════════════════════════════ */
+.header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 36px; padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.header-logo {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; color: white;
+  box-shadow: 0 2px 8px var(--accent-glow);
+  flex-shrink: 0; letter-spacing: -0.5px;
+}
+.header-text h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.2; }
+.header-text p { font-size: 13px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Pipeline Selector
+   ═══════════════════════════════════════════════════════════════ */
+.pipelines { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+@media (max-width: 640px) { .pipelines { grid-template-columns: 1fr; } }
+
+.pipe {
+  background: var(--surface-1); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); padding: 18px; cursor: pointer;
+  transition: all 0.2s ease; position: relative; overflow: hidden;
+}
+.pipe::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: transparent; transition: background 0.2s;
+}
+.pipe:hover { border-color: var(--border-hover); background: var(--surface-2); }
+.pipe.active {
+  border-color: var(--accent); background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent), var(--shadow-sm);
+}
+.pipe.active::before { background: linear-gradient(90deg, var(--accent), var(--accent-hover)); }
+.pipe-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.pipe-icon { font-size: 22px; line-height: 1; }
+.pipe-title { font-size: 13px; font-weight: 600; letter-spacing: -0.2px; }
+.pipe-desc { font-size: 11.5px; color: var(--text-tertiary); line-height: 1.55; }
+.pipe-steps { margin-top: 12px; display: none; }
+.pipe.active .pipe-steps { display: block; }
+.pipe-step {
+  font-size: 11px; color: var(--text-secondary); padding: 3px 0;
+  display: flex; align-items: center; gap: 8px;
+}
+.pipe-step::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent-hover); flex-shrink: 0; opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Card / Section
+   ═══════════════════════════════════════════════════════════════ */
+.card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 24px; margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle);
+}
+.card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+.card-badge {
+  font-size: 11px; color: var(--text-tertiary); background: var(--surface-3);
+  padding: 3px 10px; border-radius: 20px; font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mode Toggle
+   ═══════════════════════════════════════════════════════════════ */
+.mode-toggle {
+  display: inline-flex; gap: 2px; background: var(--surface-3);
+  padding: 3px; border-radius: 8px;
+}
+.mode-btn {
+  padding: 5px 14px; border: none; background: transparent;
+  color: var(--text-tertiary); font-size: 12px; font-weight: 500;
+  border-radius: 6px; cursor: pointer; transition: all 0.15s;
+  font-family: var(--font);
+}
+.mode-btn:hover { color: var(--text-secondary); }
+.mode-btn.active {
+  background: var(--surface-1); color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Info Note
+   ═══════════════════════════════════════════════════════════════ */
+.info-note {
+  font-size: 12px; color: var(--text-tertiary); line-height: 1.7;
+  background: var(--surface-2); border: 1px solid var(--border-subtle);
+  border-radius: var(--r); padding: 14px 16px; margin-bottom: 20px;
+  border-left: 3px solid var(--accent);
+}
+.info-note strong { color: var(--text-secondary); }
+.info-note code {
+  font-family: var(--mono); font-size: 11px; background: var(--surface-3);
+  padding: 2px 6px; border-radius: 4px; color: var(--accent-hover);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Form Elements
+   ═══════════════════════════════════════════════════════════════ */
+.field { margin-bottom: 18px; }
+.field-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.field-label .badge {
+  font-size: 10px; font-weight: 500; color: var(--text-quaternary);
+  background: var(--surface-3); padding: 2px 7px; border-radius: 4px;
+}
+.field-input {
+  width: 100%; padding: 10px 14px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text-primary); font-size: 13px; font-family: var(--font);
+  outline: none; transition: all 0.15s;
+}
+.field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.field-input::placeholder { color: var(--text-quaternary); }
+select.field-input {
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%2371717a'%3E%3Cpath d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px;
+}
+select.field-input option { background: var(--surface-1); color: var(--text-primary); }
+.field-hint {
+  font-size: 11px; color: var(--text-quaternary); margin-top: 5px;
+  line-height: 1.5; padding-left: 1px;
+}
+
+/* Color */
+.color-field { display: flex; gap: 8px; align-items: center; }
+.color-field input[type="color"] {
+  width: 38px; height: 36px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg); cursor: pointer; padding: 3px;
+}
+.color-field .field-input { flex: 1; }
+
+/* Checkbox */
+.check-field {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0;
+}
+.check-field input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--accent);
+  cursor: pointer; margin-top: 1px; flex-shrink: 0;
+}
+.check-field label { font-size: 13px; color: var(--text-secondary); cursor: pointer; line-height: 1.4; }
+.check-field .field-hint { margin-top: 2px; margin-left: 0; }
+
+/* Slider */
+.slider-field { display: flex; align-items: center; gap: 12px; }
+.slider-field input[type="range"] {
+  flex: 1; accent-color: var(--accent); height: 4px;
+  background: var(--surface-3); border-radius: 4px;
+}
+.slider-val {
+  min-width: 32px; text-align: right; font-size: 12px;
+  font-family: var(--mono); color: var(--accent-hover); font-weight: 500;
+}
+
+/* Grid */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   Drop Zone
+   ═══════════════════════════════════════════════════════════════ */
+.dropzone {
+  border: 1.5px dashed var(--border); border-radius: var(--r-lg);
+  padding: 28px 20px; text-align: center; cursor: pointer;
+  transition: all 0.2s ease; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.dropzone:hover { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone.dragover { border-color: var(--accent-hover); background: rgba(124, 58, 237, 0.08); border-style: solid; }
+.dropzone-icon { font-size: 28px; opacity: 0.35; }
+.dropzone-label { font-size: 12px; color: var(--text-tertiary); }
+.dropzone-label strong { color: var(--text-secondary); }
+.dropzone-name { font-size: 12px; color: var(--green); font-weight: 600; }
+.dropzone-size { font-size: 11px; color: var(--text-quaternary); }
+.dropzone input[type="file"] { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Collapsible / Accordion
+   ═══════════════════════════════════════════════════════════════ */
+.accordion-trigger {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; padding: 10px 0; width: 100%;
+  color: var(--text-tertiary); font-size: 12px; font-weight: 600;
+  border: none; background: none; font-family: var(--font);
+  text-transform: uppercase; letter-spacing: 0.3px;
+  transition: color 0.15s;
+}
+.accordion-trigger:hover { color: var(--text-secondary); }
+.accordion-trigger .chev {
+  font-size: 8px; transition: transform 0.2s ease;
+  width: 16px; height: 16px; display: flex; align-items: center;
+  justify-content: center; background: var(--surface-3);
+  border-radius: 4px; flex-shrink: 0;
+}
+.accordion-trigger.open .chev { transform: rotate(90deg); }
+.accordion-trigger .count {
+  font-size: 10px; color: var(--text-quaternary);
+  background: var(--surface-3); padding: 2px 6px; border-radius: 10px;
+  font-weight: 500; margin-left: auto;
+}
+.accordion-body {
+  display: none; padding-top: 14px; margin-top: 6px;
+  border-top: 1px solid var(--border-subtle);
+}
+.accordion-body.open { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Mask Canvas
+   ═══════════════════════════════════════════════════════════════ */
+.canvas-wrap {
+  position: relative; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+  overflow: hidden; display: flex; justify-content: center;
+  align-items: center; min-height: 180px; margin-bottom: 10px;
+}
+.canvas-wrap canvas { display: block; max-width: 100%; cursor: crosshair; }
+.canvas-empty {
+  color: var(--text-quaternary); font-size: 13px; padding: 40px;
+  text-align: center; line-height: 1.6;
+}
+.canvas-toolbar {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; margin-bottom: 10px; padding: 8px 10px;
+  background: var(--surface-2); border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+.tb {
+  padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 1px solid transparent; background: transparent;
+  color: var(--text-tertiary); font-family: var(--font); transition: all 0.12s;
+}
+.tb:hover { color: var(--text-secondary); background: var(--surface-3); }
+.tb.active { background: var(--accent); color: white; border-color: var(--accent); }
+.tb-sep { width: 1px; height: 18px; background: var(--border); margin: 0 2px; }
+.tb-size { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-quaternary); }
+.tb-size input[type="range"] { width: 70px; accent-color: var(--accent); }
+.tb-dot-wrap {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1px solid var(--border); display: flex;
+  align-items: center; justify-content: center; background: var(--surface-3);
+}
+.tb-dot { border-radius: 50%; background: rgba(248, 113, 113, 0.7); }
+.mask-fallback { font-size: 11px; color: var(--text-quaternary); margin-top: 8px; }
+.mask-fallback a { cursor: pointer; color: var(--accent-hover); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Submit Button
+   ═══════════════════════════════════════════════════════════════ */
+.submit-btn {
+  width: 100%; padding: 14px; border: none; border-radius: var(--r-lg);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: var(--font); transition: all 0.2s;
+  background: linear-gradient(135deg, var(--accent), #9333ea);
+  color: white; box-shadow: 0 2px 8px var(--accent-glow);
+}
+.submit-btn:hover {
+  background: linear-gradient(135deg, var(--accent-hover), #a855f7);
+  box-shadow: 0 4px 20px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Jobs
+   ═══════════════════════════════════════════════════════════════ */
+.jobs-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 32px 0 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.jobs-bar-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+.jobs-bar-count { font-size: 11px; color: var(--text-quaternary); margin-left: 8px; }
+.clear-btn {
+  font-size: 11px; color: var(--text-quaternary); background: none;
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; cursor: pointer; font-family: var(--font); transition: all 0.15s;
+}
+.clear-btn:hover { border-color: var(--red); color: var(--red); }
+
+.job-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px 18px; margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.job-card:hover { border-color: var(--border-hover); }
+.job-row { display: flex; align-items: center; gap: 14px; }
+.job-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+.job-dot.queued { color: var(--yellow); background: var(--yellow); }
+.job-dot.processing, .job-dot.running { color: var(--accent-hover); background: var(--accent-hover); animation: pulse-dot 1.5s infinite; }
+.job-dot.completed { color: var(--green); background: var(--green); }
+.job-dot.failed { color: var(--red); background: var(--red); }
+.job-dot.cancelled { color: var(--text-quaternary); background: var(--text-quaternary); box-shadow: none; }
+@keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.3} }
+.job-info { flex: 1; min-width: 0; }
+.job-title { font-size: 13px; font-weight: 600; }
+.job-id-text { font-size: 11px; font-family: var(--mono); color: var(--text-quaternary); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.job-tags { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 4px; }
+.job-tag { font-size: 10px; color: var(--text-quaternary); background: var(--surface-3); padding: 2px 7px; border-radius: 4px; }
+.job-progress-text { font-size: 11px; color: var(--accent-hover); margin-top: 4px; }
+.job-error-text {
+  font-size: 11px; color: var(--red); margin-top: 4px;
+  max-height: 60px; overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  cursor: pointer; border-radius: 6px; padding: 6px 8px;
+  background: var(--red-bg); border: 1px solid var(--red-border);
+  word-break: break-word; line-height: 1.5;
+}
+.job-error-text.expanded {
+  max-height: none; -webkit-line-clamp: unset;
+}
+.job-btns { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+.jbtn {
+  padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-secondary); font-family: var(--font); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s;
+}
+.jbtn:hover { border-color: var(--accent); color: var(--text-primary); text-decoration: none; }
+.jbtn-dl { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+.jbtn-dl:hover { background: var(--green); color: #000; }
+.jbtn-cancel { border-color: var(--red-border); color: var(--red); }
+.jbtn-cancel:hover { background: var(--red); color: #fff; }
+.job-result { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+.job-result video { width: 100%; max-height: 380px; border-radius: var(--r); background: #000; }
+.job-result-extra { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.job-result-extra > div { flex: 1; min-width: 180px; }
+.job-result-extra .vid-label { font-size: 11px; color: var(--text-quaternary); margin-bottom: 4px; font-weight: 500; }
+.job-result-extra video { width: 100%; border-radius: 8px; background: #000; }
+.no-jobs { text-align: center; padding: 40px 20px; color: var(--text-quaternary); font-size: 13px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Toast
+   ═══════════════════════════════════════════════════════════════ */
+.toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 12px 18px; border-radius: var(--r); font-size: 13px; font-weight: 500;
+  animation: toast-in 0.25s ease; max-width: 420px; box-shadow: var(--shadow-lg);
+  display: flex; align-items: flex-start; gap: 10px;
+  word-break: break-word; line-height: 1.4;
+}
+.toast.success { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+.toast.error { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); }
+.toast.info { background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.2); color: var(--blue); }
+@keyframes toast-in { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="header-logo">CK</div>
+    <div class="header-text">
+      <h1>CorridorKey Studio</h1>
+      <p>Neural video matting &amp; compositing</p>
+    </div>
+  </div>
+
+  <!-- ── Pipeline Selector ── -->
+  <div class="pipelines">
+    <div class="pipe active" data-pipeline="background_replace">
+      <div class="pipe-head"><span class="pipe-icon">&#x1F3AC;</span><span class="pipe-title">Background Replace</span></div>
+      <div class="pipe-desc">Swap the background of any video with an image, video, or solid color using AI matting.</div>
+      <div class="pipe-steps">
+        <div class="pipe-step">Generate mattes with GVM</div>
+        <div class="pipe-step">Filter by selection mask</div>
+        <div class="pipe-step">Refine matte edges</div>
+        <div class="pipe-step">Composite new background</div>
+      </div>
+    </div>
+    <div class="pipe" data-pipeline="greenscreen_key">
+      <div class="pipe-head"><span class="pipe-icon">&#x1F7E2;</span><span class="pipe-title">Green Screen Key</span></div>
+      <div class="pipe-desc">Neural chroma key with despill. Works with imperfect lighting and fine hair detail.</div>
+      <div class="pipe-steps">
+        <div class="pipe-step">Auto-generate alpha hint via GVM</div>
+        <div class="pipe-step">Run CorridorKey inference</div>
+        <div class="pipe-step">Despill &amp; despeckle cleanup</div>
+        <div class="pipe-step">Export clean keyed footage</div>
+      </div>
+    </div>
+    <div class="pipe" data-pipeline="rotoscope">
+      <div class="pipe-head"><span class="pipe-icon">&#x2702;&#xFE0F;</span><span class="pipe-title">Rotoscope</span></div>
+      <div class="pipe-desc">Isolate subjects from any video. Export as video, matte, or transparent PNG sequence.</div>
+      <div class="pipe-steps">
+        <div class="pipe-step">Generate mattes with GVM</div>
+        <div class="pipe-step">Filter by selection mask</div>
+        <div class="pipe-step">Refine matte edges</div>
+        <div class="pipe-step">Export subject / matte / PNGs</div>
+      </div>
+    </div>
+  </div>
+
+  <form id="mainForm" enctype="multipart/form-data">
+
+  <!-- ── Input Card ── -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Input Files</span>
+      <div class="mode-toggle">
+        <button type="button" class="mode-btn" data-mode="file">File Upload</button>
+        <button type="button" class="mode-btn active" data-mode="url">URL</button>
+      </div>
+    </div>
+
+    <div class="info-note" id="pipelineNote"></div>
+
+    <!-- File uploads -->
+    <div id="fileSection" style="display:none">
+      <div class="info-note" style="border-left-color: var(--yellow); margin-bottom: 16px;">
+        <strong style="color: var(--yellow);">Note:</strong> File upload is currently experiencing routing issues on the platform. Jobs may be misrouted to the wrong pipeline. <strong>Use URL mode for reliable results</strong> — upload your video to cloud storage and paste the URL.
+      </div>
+      <div class="field">
+        <div class="field-label">Input Video <span class="badge">Required</span></div>
+        <div class="dropzone" id="dzVideo">
+          <div class="dropzone-icon">&#x1F4F9;</div>
+          <div class="dropzone-label">Drop your video here or <strong>click to browse</strong></div>
+          <div class="dropzone-name" id="videoName"></div>
+          <div class="dropzone-size" id="videoSize"></div>
+          <input type="file" id="videoInput" accept="video/*,.mp4,.mov,.avi,.mkv,.webm">
+        </div>
+      </div>
+
+      <div class="field" id="bgImageField">
+        <div class="field-label">Background Image <span class="badge">Optional</span></div>
+        <div class="dropzone" id="dzBgImage">
+          <div class="dropzone-icon">&#x1F5BC;</div>
+          <div class="dropzone-label">Drop background image or <strong>click to browse</strong></div>
+          <div class="dropzone-name" id="bgImageName"></div>
+          <div class="dropzone-size" id="bgImageSize"></div>
+          <input type="file" id="bgImageInput" accept="image/*,.png,.jpg,.jpeg,.webp,.exr">
+        </div>
+      </div>
+
+      <div class="field" id="bgVideoField" style="display:none">
+        <div class="field-label">Background Video <span class="badge">Optional &middot; Loops</span></div>
+        <div class="dropzone" id="dzBgVideo">
+          <div class="dropzone-icon">&#x1F39E;</div>
+          <div class="dropzone-label">Drop background video or <strong>click to browse</strong></div>
+          <div class="dropzone-name" id="bgVideoName"></div>
+          <div class="dropzone-size" id="bgVideoSize"></div>
+          <input type="file" id="bgVideoInput" accept="video/*,.mp4,.mov,.avi,.mkv,.webm">
+        </div>
+      </div>
+
+      <div class="field" id="maskField" style="display:none">
+        <div class="field-label" id="maskLabel">Alpha Hint</div>
+        <div class="dropzone" id="dzMask">
+          <div class="dropzone-icon">&#x1F3AD;</div>
+          <div class="dropzone-label">Drop file or <strong>click to browse</strong></div>
+          <div class="dropzone-name" id="maskName"></div>
+          <div class="dropzone-size" id="maskSize"></div>
+          <input type="file" id="maskInput" accept="video/*,image/*,.mp4,.png,.jpg">
+        </div>
+      </div>
+
+      <!-- Canvas mask -->
+      <div id="canvasSection" style="display:none">
+        <button type="button" class="accordion-trigger" id="canvasToggle">
+          <span class="chev">&#9654;</span>
+          Select Subject
+          <span class="count">Optional</span>
+        </button>
+        <div class="accordion-body" id="canvasBody">
+          <div class="info-note" style="margin-bottom:14px">
+            Upload a video first, then <strong>paint over the subjects</strong> you want to keep.
+            Leave blank to keep everything GVM detects. Use the <strong>eraser</strong> to fix mistakes.
+            The mask is automatically dilated to be forgiving with rough brush strokes.
+          </div>
+          <div class="canvas-toolbar">
+            <button type="button" class="tb active" data-tool="brush">Brush</button>
+            <button type="button" class="tb" data-tool="eraser">Eraser</button>
+            <div class="tb-sep"></div>
+            <div class="tb-size">
+              Size <input type="range" id="brushSize" min="5" max="100" value="40">
+              <div class="tb-dot-wrap"><div class="tb-dot" id="brushDot"></div></div>
+            </div>
+            <div class="tb-sep"></div>
+            <button type="button" class="tb" id="btnClear">Clear</button>
+            <button type="button" class="tb" id="btnUndo">Undo</button>
+          </div>
+          <div class="canvas-wrap" id="canvasWrap">
+            <div class="canvas-empty" id="canvasEmpty">Upload a video above to load the first frame here</div>
+            <canvas id="bgCanvas" style="display:none"></canvas>
+            <canvas id="drawCanvas" style="position:absolute;top:0;left:0;display:none"></canvas>
+          </div>
+          <div class="mask-fallback">
+            Or <a id="maskFileLink">upload a pre-made mask PNG instead</a>
+            <span id="maskInlineWrap" style="display:none">
+              <input type="file" id="maskInlineInput" accept="image/*,.png" style="font-size:11px;margin-left:6px">
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- URL inputs -->
+    <div id="urlSection">
+      <div class="field">
+        <div class="field-label">Video URL <span class="badge">Required</span></div>
+        <input class="field-input" type="url" id="videoUrl" placeholder="https://example.com/video.mp4">
+      </div>
+      <div class="field" id="imageUrlField">
+        <div class="field-label">Background Image URL <span class="badge">Optional</span></div>
+        <input class="field-input" type="url" id="imageUrl" placeholder="https://example.com/background.png">
+      </div>
+    </div>
+
+    <!-- Webhook -->
+    <button type="button" class="accordion-trigger" id="webhookToggle">
+      <span class="chev">&#9654;</span> Webhook <span class="count">Optional</span>
+    </button>
+    <div class="accordion-body" id="webhookBody">
+      <div class="field">
+        <div class="field-label">Callback URL</div>
+        <input class="field-input" type="url" id="webhookUrl" placeholder="https://your-server.com/callback">
+        <div class="field-hint">The platform will POST the result to this URL when processing completes. The payload includes <code>job_id</code>, <code>status</code>, <code>result_url</code>, and <code>additional_urls</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Parameters Card ── -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Parameters</span>
+      <span class="card-badge" id="paramsBadge"></span>
+    </div>
+    <div id="paramsContainer"></div>
+  </div>
+
+  <!-- ── Submit ── -->
+  <button type="submit" class="submit-btn" id="submitBtn">Submit Job</button>
+
+  </form>
+
+  <!-- ── Jobs ── -->
+  <div class="jobs-bar">
+    <div>
+      <span class="jobs-bar-title">Jobs</span>
+      <span class="jobs-bar-count" id="jobsCount"></span>
+    </div>
+    <button class="clear-btn" id="clearBtn" style="display:none">Clear All</button>
+  </div>
+  <div id="jobsList"><div class="no-jobs">No jobs submitted yet</div></div>
+
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   State
+   ═══════════════════════════════════════════════════════════════ */
+const S = {
+  pipeline: 'background_replace',
+  mode: 'url',
+  jobs: JSON.parse(localStorage.getItem('ck_jobs') || '[]'),
+  polling: {},
+};
+const MC = { tool:'brush', size:40, drawing:false, history:[], loaded:false, vw:0, vh:0, img:null };
+
+/* ═══════════════════════════════════════════════════════════════
+   Pipeline Definitions (full parity with api.py)
+   ═══════════════════════════════════════════════════════════════ */
+const PIPES = {
+  background_replace: {
+    bgImage:true, bgVideo:true, maskFile:false, canvas:true, imageUrl:true,
+    note: '<strong>Background Replace</strong> removes the original background and composites your subject onto a new one.<br>Upload a <strong>background image</strong> or <strong>background video</strong> (loops automatically if shorter), or leave both blank to fill with the fallback <code>bg_color</code>.<br>Optionally <strong>paint a selection mask</strong> to restrict which subjects are isolated when multiple people are in frame.',
+    basic: [
+      { k:'device', l:'Device', t:'select', o:['auto','cuda','mps','cpu'], d:'auto', h:'Processing device. <code>auto</code> picks the best available GPU on the server.' },
+      { k:'bg_color', l:'Fallback Background Color', t:'color', d:'#000000', h:'Solid color used when no background image or video is provided.' },
+      { k:'gvm_batch', l:'Frames per Batch', t:'slider', d:4, mn:1, mx:12, h:'Temporal context window for GVM. <strong>4</strong> is safe on 80 GB VRAM, <strong>8</strong> is optimal but may need lower resolution. This is the main lever for reducing temporal jitter.' },
+    ],
+    advanced: [
+      { k:'gvm_ensemble', l:'Ensemble Size', t:'slider', d:1, mn:1, mx:5, h:'Runs inference N times and averages the result. <strong>3</strong> is the paper default and stabilizes edges, but multiplies VRAM usage and processing time.' },
+      { k:'gvm_overlap', l:'Overlap Frames', t:'slider', d:2, mn:1, mx:4, h:'Number of frames shared between consecutive batches. Ensures smooth transitions. <strong>2-3</strong> recommended.' },
+      { k:'refine_threshold', l:'Threshold', t:'slider', d:0, mn:0, mx:255, h:'Binarize the matte at this value. <strong>0</strong> = off (keep soft edges). Try <strong>128</strong> for a hard cutoff that removes semi-transparent noise.' },
+      { k:'refine_min_area', l:'Min Region Size (px)', t:'number', d:0, mn:0, mx:999999, h:'Remove detected blobs smaller than this pixel area. Helps eliminate small floating artifacts. Try <strong>500-5000</strong>.' },
+      { k:'refine_temporal_smooth', l:'Temporal Smoothing', t:'slider', d:0, mn:0, mx:10, h:'Average the matte across N neighboring frames. Reduces frame-to-frame jitter at the cost of slight motion lag.' },
+      { k:'refine_erode', l:'Erode (shrink)', t:'slider', d:0, mn:0, mx:10, h:'Shrink foreground edges by N pixels. Removes thin stray edge artifacts and noise.' },
+      { k:'refine_dilate', l:'Dilate (expand)', t:'slider', d:0, mn:0, mx:10, h:'Expand foreground edges by N pixels. Use after erode to fill gaps while keeping the cleanup.' },
+      { k:'refine_blur', l:'Edge Blur', t:'slider', d:0, mn:0, mx:21, h:'Gaussian blur kernel size for matte edges (use odd values). Softens compositing seams.' },
+      { k:'keep_mattes', l:'Keep Matte PNGs', t:'check', d:false, h:'Save individual matte frame PNGs alongside the composited video result.' },
+    ],
+    advTitle: 'Matte Refinement — fix jitter & unwanted objects',
+  },
+
+  greenscreen_key: {
+    bgImage:false, bgVideo:false, maskFile:true, canvas:false, imageUrl:false,
+    maskLabel: 'Alpha Hint <span class="badge">Optional &middot; Auto-generated</span>',
+    note: '<strong>Green Screen Key</strong> uses CorridorKey neural keying for professional chroma key extraction.<br>Works with imperfect green screens, uneven lighting, motion blur, and fine details like hair and transparency.<br>If no <strong>alpha hint</strong> video is uploaded, GVM will auto-generate one. <strong>Despill</strong> removes green color bleed from subject edges.',
+    basic: [
+      { k:'device', l:'Device', t:'select', o:['auto','cuda','mps','cpu'], d:'auto', h:'Processing device. <code>auto</code> picks the best available GPU.' },
+      { k:'despill_strength', l:'Despill Strength', t:'slider', d:0.5, mn:0, mx:1, step:0.05, h:'How aggressively to remove green color bleed from subject edges. <strong>0</strong> = no despill, <strong>1</strong> = maximum.' },
+      { k:'auto_despeckle', l:'Auto-Despeckle', t:'check', d:true, h:'Automatically remove small noise specks and tracking dots from the output matte.' },
+    ],
+    advanced: [
+      { k:'use_gvm_alpha', l:'Auto-Generate Alpha Hint', t:'check', d:true, h:'Use GVM to automatically generate an alpha hint if none is uploaded. Disable only if you have your own alpha hint video.' },
+      { k:'input_is_linear', l:'Linear Color Input', t:'check', d:false, h:'Enable if your footage is in linear color space (not sRGB). Most camera footage is sRGB.' },
+      { k:'despeckle_size', l:'Despeckle Min Size (px)', t:'number', d:400, mn:0, mx:10000, h:'Minimum blob pixel area to survive despeckle. Smaller blobs are removed. <strong>0</strong> = disabled.' },
+      { k:'refiner_scale', l:'Refiner Strength', t:'slider', d:1.0, mn:0, mx:3, step:0.1, h:'Edge refinement intensity. <strong>1.0</strong> is the default. Higher values may improve edges but is experimental.' },
+      { k:'max_frames', l:'Max Frames', t:'number', d:0, mn:0, mx:99999, h:'Process only this many frames. <strong>0</strong> = process entire video. Useful for quick test runs on long footage.' },
+    ],
+    advTitle: 'Advanced Inference Settings',
+  },
+
+  rotoscope: {
+    bgImage:false, bgVideo:false, maskFile:false, canvas:true, imageUrl:false,
+    note: '<strong>Rotoscope</strong> isolates subjects from any video without a green screen.<br>Outputs include: <strong>subject video</strong> (isolated subject on solid background), <strong>matte video</strong> (black & white alpha channel), and optionally a <strong>transparent PNG sequence</strong>.<br>Paint a <strong>selection mask</strong> on the first frame to choose which subject(s) to isolate in multi-person scenes.',
+    basic: [
+      { k:'device', l:'Device', t:'select', o:['auto','cuda','mps','cpu'], d:'auto', h:'Processing device. <code>auto</code> picks the best available GPU.' },
+      { k:'gvm_batch', l:'Frames per Batch', t:'slider', d:4, mn:1, mx:12, h:'<strong>4</strong> is safe on 80 GB VRAM. <strong>8</strong> is optimal quality but may run out of memory on high-resolution video.' },
+      { k:'export_subject_video', l:'Export Subject Video', t:'check', d:true, h:'Output a video with the isolated subject on a solid background color.' },
+      { k:'export_matte_video', l:'Export Matte Video', t:'check', d:true, h:'Output a grayscale video showing the alpha channel (white = foreground, black = background).' },
+      { k:'export_transparent_pngs', l:'Export Transparent PNGs', t:'check', d:false, h:'Export every frame as a transparent RGBA PNG. <strong>Warning:</strong> produces a large number of files.' },
+      { k:'subject_bg_color', l:'Subject Background Color', t:'color', d:'#000000', h:'Solid color placed behind the isolated subject in the output video.' },
+    ],
+    advanced: [
+      { k:'gvm_ensemble', l:'Ensemble Size', t:'slider', d:1, mn:1, mx:5, h:'Higher = better quality but slower. <strong>3</strong> is the paper default. Multiplies VRAM usage.' },
+      { k:'gvm_overlap', l:'Overlap Frames', t:'slider', d:2, mn:1, mx:4, h:'Frames shared between batches for temporal consistency.' },
+      { k:'refine_threshold', l:'Threshold', t:'slider', d:0, mn:0, mx:255, h:'<strong>0</strong> = off. Binarize the matte to remove semi-transparent noise.' },
+      { k:'refine_min_area', l:'Min Region Size (px)', t:'number', d:0, mn:0, mx:999999, h:'Remove blobs smaller than this. Try <strong>500-5000</strong>.' },
+      { k:'refine_temporal_smooth', l:'Temporal Smoothing', t:'slider', d:0, mn:0, mx:10, h:'Blend mattes across N frames to reduce flicker.' },
+      { k:'refine_erode', l:'Erode', t:'slider', d:0, mn:0, mx:10, h:'Shrink foreground edges by N pixels.' },
+      { k:'refine_dilate', l:'Dilate', t:'slider', d:0, mn:0, mx:10, h:'Expand foreground edges by N pixels.' },
+      { k:'refine_blur', l:'Edge Blur', t:'slider', d:0, mn:0, mx:21, h:'Soften matte edges with Gaussian blur.' },
+    ],
+    advTitle: 'Matte Refinement',
+  },
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   Utilities
+   ═══════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const fmtSize = b => b < 1024 ? b+' B' : b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB';
+const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString() : '';
+
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  $('#toastWrap').appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 4000);
+}
+
+function saveJobs() { localStorage.setItem('ck_jobs', JSON.stringify(S.jobs)); }
+
+function setupDrop(zoneId, inputId, nameId, sizeId) {
+  const z=$(zoneId), inp=$(inputId), nm=$(nameId), sz=$(sizeId);
+  z.addEventListener('click', () => inp.click());
+  z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('dragover'); });
+  z.addEventListener('dragleave', () => z.classList.remove('dragover'));
+  z.addEventListener('drop', e => { e.preventDefault(); z.classList.remove('dragover'); if(e.dataTransfer.files.length){inp.files=e.dataTransfer.files; nm.textContent=inp.files[0].name; sz.textContent=fmtSize(inp.files[0].size)} });
+  inp.addEventListener('change', () => { if(inp.files[0]){nm.textContent=inp.files[0].name; sz.textContent=fmtSize(inp.files[0].size)} else {nm.textContent=''; sz.textContent=''} });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mask Canvas
+   ═══════════════════════════════════════════════════════════════ */
+function initCanvas() {
+  const bg=$('#bgCanvas'), dr=$('#drawCanvas');
+  let lx, ly;
+
+  function pos(e) {
+    const r=dr.getBoundingClientRect(), sx=dr.width/r.width, sy=dr.height/r.height;
+    const cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY;
+    return [(cx-r.left)*sx, (cy-r.top)*sy];
+  }
+
+  function down(e) { e.preventDefault(); MC.drawing=true; [lx,ly]=pos(e); saveSnap(); }
+  function move(e) {
+    if(!MC.drawing||!MC.loaded) return; e.preventDefault();
+    const [x,y]=pos(e), ctx=dr.getContext('2d');
+    ctx.lineWidth=MC.size; ctx.lineCap='round'; ctx.lineJoin='round';
+    if(MC.tool==='eraser'){ctx.globalCompositeOperation='destination-out'; ctx.strokeStyle='rgba(255,255,255,1)'}
+    else {ctx.globalCompositeOperation='source-over'; ctx.strokeStyle='rgba(248,113,113,0.5)'}
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(x,y); ctx.stroke();
+    [lx,ly]=[x,y]; compositeView();
+  }
+  function up() { MC.drawing=false; }
+
+  dr.addEventListener('mousedown',down); dr.addEventListener('mousemove',move); dr.addEventListener('mouseup',up); dr.addEventListener('mouseleave',up);
+  dr.addEventListener('touchstart',down,{passive:false}); dr.addEventListener('touchmove',move,{passive:false}); dr.addEventListener('touchend',up);
+
+  function compositeView() { const c=bg.getContext('2d'); c.clearRect(0,0,bg.width,bg.height); if(MC.img)c.drawImage(MC.img,0,0,bg.width,bg.height); c.drawImage(dr,0,0); }
+  function saveSnap() { MC.history.push(dr.getContext('2d').getImageData(0,0,dr.width,dr.height)); if(MC.history.length>30)MC.history.shift(); }
+
+  $('#btnClear').addEventListener('click',()=>{dr.getContext('2d').clearRect(0,0,dr.width,dr.height); MC.history=[]; compositeView()});
+  $('#btnUndo').addEventListener('click',()=>{MC.history.pop(); const p=MC.history[MC.history.length-1]; const c=dr.getContext('2d'); c.clearRect(0,0,dr.width,dr.height); if(p)c.putImageData(p,0,0); compositeView()});
+  $$('[data-tool]').forEach(b=>b.addEventListener('click',()=>{$$('[data-tool]').forEach(x=>x.classList.remove('active'));b.classList.add('active');MC.tool=b.dataset.tool}));
+
+  const bsi=$('#brushSize'), dot=$('#brushDot');
+  function updDot(){const s=Math.max(4,Math.min(16,bsi.value/100*16));dot.style.width=s+'px';dot.style.height=s+'px';MC.size=parseInt(bsi.value)}
+  bsi.addEventListener('input',updDot); updDot();
+}
+
+function loadFrame(file) {
+  const v=document.createElement('video'); v.muted=true; v.playsInline=true; v.src=URL.createObjectURL(file);
+  v.addEventListener('loadeddata',()=>{
+    v.currentTime=0.01;
+    v.addEventListener('seeked',()=>{
+      const bg=$('#bgCanvas'),dr=$('#drawCanvas'),ph=$('#canvasEmpty');
+      const w=v.videoWidth,h=v.videoHeight; MC.vw=w;MC.vh=h;
+      const maxW=Math.min(860,w), sc=maxW/w, dw=Math.round(w*sc), dh=Math.round(h*sc);
+      bg.width=dw;bg.height=dh;dr.width=dw;dr.height=dh;
+      bg.style.display='block';dr.style.display='block';ph.style.display='none';
+      bg.getContext('2d').drawImage(v,0,0,dw,dh);
+      MC.img=new Image();MC.img.src=bg.toDataURL(); MC.loaded=true;MC.history=[];
+      dr.getContext('2d').clearRect(0,0,dw,dh);
+      URL.revokeObjectURL(v.src);
+    },{once:true});
+  });
+}
+
+function exportMask() {
+  return new Promise(res=>{
+    if(!MC.loaded){res(null);return}
+    const dr=$('#drawCanvas'),ctx=dr.getContext('2d'),id=ctx.getImageData(0,0,dr.width,dr.height);
+    let has=false; for(let i=3;i<id.data.length;i+=4){if(id.data[i]>0){has=true;break}}
+    if(!has){res(null);return}
+    const c=document.createElement('canvas');c.width=MC.vw;c.height=MC.vh;
+    const m=c.getContext('2d'); m.drawImage(dr,0,0,MC.vw,MC.vh);
+    const d=m.getImageData(0,0,MC.vw,MC.vh);
+    for(let i=0;i<d.data.length;i+=4){const a=d.data[i+3];d.data[i]=d.data[i+1]=d.data[i+2]=a>10?255:0;d.data[i+3]=255}
+    m.putImageData(d,0,0); c.toBlob(b=>res(b),'image/png');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Render Parameter Fields
+   ═══════════════════════════════════════════════════════════════ */
+function mkField(p) {
+  const el = document.createElement('div');
+
+  if (p.t === 'select') {
+    el.className='field';
+    el.innerHTML=`<div class="field-label">${p.l}</div><select class="field-input" id="p_${p.k}">${p.o.map(v=>`<option value="${v}"${v===p.d?' selected':''}>${v}</option>`).join('')}</select>`;
+    if(p.h) el.innerHTML+=`<div class="field-hint">${p.h}</div>`;
+  }
+  else if (p.t === 'check') {
+    el.className='check-field';
+    el.innerHTML=`<input type="checkbox" id="p_${p.k}"${p.d?' checked':''}><label for="p_${p.k}">${p.l}</label>`;
+    if(p.h) el.innerHTML+=`<div class="field-hint">${p.h}</div>`;
+  }
+  else if (p.t === 'color') {
+    el.className='field';
+    el.innerHTML=`<div class="field-label">${p.l}</div><div class="color-field"><input type="color" id="p_${p.k}_c" value="${p.d}"><input class="field-input" type="text" id="p_${p.k}" value="${p.d}" placeholder="#000000"></div>`;
+    if(p.h) el.innerHTML+=`<div class="field-hint">${p.h}</div>`;
+    setTimeout(()=>{const c=$(`#p_${p.k}_c`),t=$(`#p_${p.k}`);if(c&&t){c.addEventListener('input',()=>t.value=c.value);t.addEventListener('input',()=>{if(/^#[0-9a-fA-F]{6}$/.test(t.value))c.value=t.value})}},0);
+  }
+  else if (p.t === 'slider') {
+    el.className='field';
+    const step=p.step||1;
+    el.innerHTML=`<div class="field-label">${p.l}</div><div class="slider-field"><input type="range" id="p_${p.k}" value="${p.d}" min="${p.mn}" max="${p.mx}" step="${step}"><span class="slider-val" id="p_${p.k}_v">${p.d}</span></div>`;
+    if(p.h) el.innerHTML+=`<div class="field-hint">${p.h}</div>`;
+    setTimeout(()=>{const s=$(`#p_${p.k}`),v=$(`#p_${p.k}_v`);if(s&&v)s.addEventListener('input',()=>v.textContent=s.value)},0);
+  }
+  else {
+    el.className='field';
+    el.innerHTML=`<div class="field-label">${p.l}</div><input class="field-input" type="number" id="p_${p.k}" value="${p.d}" min="${p.mn||0}" max="${p.mx||99999}">`;
+    if(p.h) el.innerHTML+=`<div class="field-hint">${p.h}</div>`;
+  }
+  return el;
+}
+
+function renderParams() {
+  const cfg=PIPES[S.pipeline], c=$('#paramsContainer'); c.innerHTML='';
+  const g=document.createElement('div'); g.className='form-grid';
+  cfg.basic.forEach(p=>g.appendChild(mkField(p))); c.appendChild(g);
+  const total=cfg.basic.length+(cfg.advanced||[]).length;
+  $('#paramsBadge').textContent=total+' parameters';
+
+  if(cfg.advanced?.length) {
+    const trig=document.createElement('button');trig.type='button';trig.className='accordion-trigger';
+    trig.innerHTML=`<span class="chev">&#9654;</span>${cfg.advTitle}<span class="count">${cfg.advanced.length}</span>`;
+    const body=document.createElement('div');body.className='accordion-body';
+    const ag=document.createElement('div');ag.className='form-grid';
+    cfg.advanced.forEach(p=>ag.appendChild(mkField(p)));body.appendChild(ag);
+    trig.addEventListener('click',()=>{trig.classList.toggle('open');body.classList.toggle('open')});
+    c.appendChild(trig);c.appendChild(body);
+  }
+}
+
+function updateUI() {
+  const cfg=PIPES[S.pipeline];
+  $('#fileSection').style.display=S.mode==='file'?'':'none';
+  $('#urlSection').style.display=S.mode==='url'?'':'none';
+  $('#bgImageField').style.display=cfg.bgImage?'':'none';
+  $('#bgVideoField').style.display=cfg.bgVideo?'':'none';
+  $('#maskField').style.display=cfg.maskFile?'':'none';
+  $('#canvasSection').style.display=cfg.canvas?'':'none';
+  $('#imageUrlField').style.display=cfg.imageUrl?'':'none';
+  if(cfg.maskLabel) $('#maskLabel').innerHTML=cfg.maskLabel;
+  $('#pipelineNote').innerHTML=cfg.note;
+}
+
+function getParams() {
+  const cfg=PIPES[S.pipeline], out={};
+  [...cfg.basic,...(cfg.advanced||[])].forEach(p=>{
+    const el=$(`#p_${p.k}`);if(!el)return;
+    if(p.t==='check')out[p.k]=el.checked;
+    else if(p.t==='number'||p.t==='slider')out[p.k]=parseFloat(el.value);
+    else out[p.k]=el.value;
+  });
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Jobs
+   ═══════════════════════════════════════════════════════════════ */
+const LBL={background_replace:'Background Replace',greenscreen_key:'Green Screen Key',rotoscope:'Rotoscope'};
+
+function renderJobs() {
+  const c=$('#jobsList');
+  $('#jobsCount').textContent=S.jobs.length?`(${S.jobs.length})`:'';
+  $('#clearBtn').style.display=S.jobs.length?'':'none';
+  if(!S.jobs.length){c.innerHTML='<div class="no-jobs">No jobs submitted yet</div>';return}
+
+  c.innerHTML=S.jobs.map(j=>{
+    const st=j.status||'unknown';
+    let btns='';
+    if(st==='completed'&&j.result_url){
+      btns+=`<a href="${j.result_url}" target="_blank" class="jbtn jbtn-dl">Download</a>`;
+      (j.additional_urls||[]).forEach((u,i)=>{const l=u.includes('subject')?'Subject':u.includes('matte')?'Matte':`Extra ${i+1}`;btns+=`<a href="${u}" target="_blank" class="jbtn">${l}</a>`});
+    }
+    if(st==='queued') btns+=`<button onclick="cancelJob('${j.job_id}')" class="jbtn jbtn-cancel">Cancel</button>`;
+
+    const tags=[st.charAt(0).toUpperCase()+st.slice(1)];
+    if(j.position_in_queue!==undefined&&st==='queued')tags.push(`Queue #${j.position_in_queue}`);
+    if(j.started_at)tags.push(`Started ${fmtTime(j.started_at)}`);
+    if(j.completed_at)tags.push(`Done ${fmtTime(j.completed_at)}`);
+    if(j.started_at&&j.completed_at){const d=Math.round((new Date(j.completed_at)-new Date(j.started_at))/1000);tags.push(d<60?d+'s':Math.floor(d/60)+'m '+d%60+'s')}
+
+    let vid='';
+    if(st==='completed'&&j.result_url&&/\.(mp4|mov|webm)(\?|$)/i.test(j.result_url)){
+      vid=`<div class="job-result"><video controls preload="metadata" src="${j.result_url}"></video>`;
+      if(j.additional_urls?.length){vid+=`<div class="job-result-extra">`;j.additional_urls.forEach(u=>{const l=u.includes('subject')?'Subject Video':u.includes('matte')?'Matte Video':'Extra';if(/\.(mp4|mov|webm)(\?|$)/i.test(u))vid+=`<div><div class="vid-label">${l}</div><video controls preload="metadata" src="${u}"></video></div>`});vid+=`</div>`}
+      vid+=`</div>`;
+    }
+
+    return `<div class="job-card"><div class="job-row"><div class="job-dot ${st}"></div><div class="job-info"><div class="job-title">${LBL[j.pipeline||j.variant?.split(':')[1]]||j.pipeline||'Job'}</div><div class="job-id-text">${j.job_id}</div><div class="job-tags">${tags.map(t=>`<span class="job-tag">${t}</span>`).join('')}</div>${j.progress?`<div class="job-progress-text">${j.progress}</div>`:''}${j.error?`<div class="job-error-text" onclick="this.classList.toggle('expanded')" title="Click to expand">${j.error.length>300?j.error.slice(0,300)+'...':j.error}</div>`:''}</div><div class="job-btns">${btns}</div></div>${vid}</div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   API
+   ═══════════════════════════════════════════════════════════════ */
+async function submitJob(e) {
+  e.preventDefault();
+  const btn=$('#submitBtn');btn.disabled=true;btn.textContent='Submitting...';
+  try {
+    const fd=new FormData();
+    fd.append('pipeline',S.pipeline);fd.append('mode',S.mode);
+    fd.append('corridorkey_params',JSON.stringify(getParams()));
+    const wh=$('#webhookUrl').value.trim();if(wh)fd.append('webhook_url',wh);
+
+    if(S.mode==='url'){
+      fd.append('video_url',$('#videoUrl').value);
+      if(PIPES[S.pipeline].imageUrl)fd.append('image_url',$('#imageUrl').value);
+    } else {
+      const v=$('#videoInput').files[0];if(!v){toast('Please select a video file','error');return}
+      fd.append('file',v);
+      const bi=$('#bgImageInput').files[0];if(bi)fd.append('background_file',bi);
+      const bv=$('#bgVideoInput').files[0];if(bv)fd.append('background_video',bv);
+      const mf=$('#maskInput').files[0]||$('#maskInlineInput').files[0];
+      if(mf)fd.append('mask_file',mf);
+      else if(PIPES[S.pipeline].canvas){const mb=await exportMask();if(mb)fd.append('mask_file',mb,'selection_mask.png')}
+    }
+
+    const resp=await fetch('/api/submit',{method:'POST',body:fd});
+    const data=await resp.json();
+    if(data.error){const m=(typeof data.detail==='string'?data.detail:data.error)||'';toast(m.slice(0,120)+(m.length>120?'...':''),'error');return}
+    toast(`Job queued: ${data.job_id?.slice(0,8)}...`,'success');
+    S.jobs.unshift(data);saveJobs();renderJobs();startPolling(data.job_id);
+    $$('.dropzone-name').forEach(e=>e.textContent='');$$('.dropzone-size').forEach(e=>e.textContent='');
+  } catch(err){toast(err.message,'error')} finally {btn.disabled=false;btn.textContent='Submit Job'}
+}
+
+function startPolling(id) {
+  if(S.polling[id])return;
+  S.polling[id]=setInterval(async()=>{
+    try{
+      const r=await fetch(`/api/status/${id}`),d=await r.json();
+      const i=S.jobs.findIndex(j=>j.job_id===id);
+      if(i>=0){S.jobs[i]={...S.jobs[i],...d};saveJobs();renderJobs()}
+      if(d.status==='completed'||d.status==='failed'){
+        clearInterval(S.polling[id]);delete S.polling[id];
+        const errMsg=d.error?d.error.slice(0,100)+(d.error.length>100?'...':''):'Unknown error';
+        toast(d.status==='completed'?'Job completed!':'Job failed: '+errMsg,d.status==='completed'?'success':'error');
+      }
+    }catch(e){console.error('Poll:',e)}
+  },3000);
+}
+
+window.cancelJob=async function(id){
+  try{await fetch(`/api/cancel/${id}`,{method:'DELETE'});clearInterval(S.polling[id]);delete S.polling[id];
+  const i=S.jobs.findIndex(j=>j.job_id===id);if(i>=0){S.jobs[i].status='cancelled';saveJobs()}
+  toast('Job cancelled','info');renderJobs()}catch(e){toast(e.message,'error')}
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   Init
+   ═══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  $$('.pipe').forEach(c=>c.addEventListener('click',()=>{$$('.pipe').forEach(x=>x.classList.remove('active'));c.classList.add('active');S.pipeline=c.dataset.pipeline;renderParams();updateUI()}));
+  $$('.mode-btn').forEach(b=>b.addEventListener('click',()=>{$$('.mode-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');S.mode=b.dataset.mode;updateUI()}));
+
+  ['canvasToggle/canvasBody','webhookToggle/webhookBody'].forEach(p=>{const[a,b]=p.split('/');$('#'+a).addEventListener('click',()=>{$('#'+a).classList.toggle('open');$('#'+b).classList.toggle('open')})});
+  $('#maskFileLink').addEventListener('click',e=>{e.preventDefault();$('#maskInlineWrap').style.display=$('#maskInlineWrap').style.display==='none'?'inline':'none'});
+  $('#clearBtn').addEventListener('click',()=>{Object.values(S.polling).forEach(i=>clearInterval(i));S.polling={};S.jobs=[];saveJobs();renderJobs()});
+
+  setupDrop('#dzVideo','#videoInput','#videoName','#videoSize');
+  setupDrop('#dzBgImage','#bgImageInput','#bgImageName','#bgImageSize');
+  setupDrop('#dzBgVideo','#bgVideoInput','#bgVideoName','#bgVideoSize');
+  setupDrop('#dzMask','#maskInput','#maskName','#maskSize');
+
+  $('#videoInput').addEventListener('change',()=>{const f=$('#videoInput').files[0];if(f)loadFrame(f)});
+
+  initCanvas();
+  $('#mainForm').addEventListener('submit',submitJob);
+  S.jobs.forEach(j=>{if(['queued','processing','running'].includes(j.status))startPolling(j.job_id)});
+  renderParams();updateUI();renderJobs();
+});
+</script>
+</body>
+</html>
