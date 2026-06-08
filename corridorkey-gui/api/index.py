@@ -12,6 +12,14 @@ API_BASE = "https://platform.indianetailer.in/v1/inference"
 API_KEY = os.environ.get("CORRIDORKEY_API_KEY", "")
 
 
+@app.route("/api/upload-key", methods=["GET"])
+def api_upload_key():
+    """Return API key + base URL so the browser can upload directly for large files."""
+    if not API_KEY:
+        return jsonify({"error": "API key not configured"}), 500
+    return jsonify({"key": API_KEY, "base": API_BASE})
+
+
 @app.route("/api/submit", methods=["POST"])
 def api_submit():
     try:

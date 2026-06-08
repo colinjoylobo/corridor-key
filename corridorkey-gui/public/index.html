@@ -484,7 +484,7 @@ select.field-input option { background: var(--surface-1); color: var(--text-prim
     </div>
   </div>
 
-  <form id="mainForm" enctype="multipart/form-data">
+  <form id="mainForm" enctype="multipart/form-data" novalidate>
 
   <!-- ── Input Card ── -->
   <div class="card">
@@ -591,11 +591,11 @@ select.field-input option { background: var(--surface-1); color: var(--text-prim
     <div id="urlSection">
       <div class="field">
         <div class="field-label">Video URL <span class="badge">Required</span></div>
-        <input class="field-input" type="url" id="videoUrl" placeholder="https://example.com/video.mp4">
+        <input class="field-input" type="text" id="videoUrl" placeholder="https://example.com/video.mp4">
       </div>
       <div class="field" id="imageUrlField">
         <div class="field-label">Background Image URL <span class="badge">Optional</span></div>
-        <input class="field-input" type="url" id="imageUrl" placeholder="https://example.com/background.png">
+        <input class="field-input" type="text" id="imageUrl" placeholder="https://example.com/background.png">
       </div>
     </div>
 
@@ -606,7 +606,7 @@ select.field-input option { background: var(--surface-1); color: var(--text-prim
     <div class="accordion-body" id="webhookBody">
       <div class="field">
         <div class="field-label">Callback URL</div>
-        <input class="field-input" type="url" id="webhookUrl" placeholder="https://your-server.com/callback">
+        <input class="field-input" type="text" id="webhookUrl" placeholder="https://your-server.com/callback">
         <div class="field-hint">The platform will POST the result to this URL when processing completes. The payload includes <code>job_id</code>, <code>status</code>, <code>result_url</code>, and <code>additional_urls</code>.</div>
       </div>
     </div>
@@ -622,7 +622,7 @@ select.field-input option { background: var(--surface-1); color: var(--text-prim
   </div>
 
   <!-- ── Submit ── -->
-  <button type="submit" class="submit-btn" id="submitBtn">Submit Job</button>
+  <button type="button" class="submit-btn" id="submitBtn">Submit Job</button>
 
   </form>
 
@@ -939,33 +939,73 @@ function renderJobs() {
 /* ═══════════════════════════════════════════════════════════════
    API
    ═══════════════════════════════════════════════════════════════ */
+const MAX_PROXY_SIZE=4*1024*1024; // 4MB — Vercel Hobby limit
+
 async function submitJob(e) {
   e.preventDefault();
   const btn=$('#submitBtn');btn.disabled=true;btn.textContent='Submitting...';
   try {
-    const fd=new FormData();
-    fd.append('pipeline',S.pipeline);fd.append('mode',S.mode);
-    fd.append('corridorkey_params',JSON.stringify(getParams()));
-    const wh=$('#webhookUrl').value.trim();if(wh)fd.append('webhook_url',wh);
+    const params=getParams();
+    const wh=$('#webhookUrl').value.trim();
 
     if(S.mode==='url'){
-      fd.append('video_url',$('#videoUrl').value);
-      if(PIPES[S.pipeline].imageUrl)fd.append('image_url',$('#imageUrl').value);
+      const fd=new FormData();
+      fd.append('pipeline',S.pipeline);fd.append('mode','url');
+      fd.append('corridorkey_params',JSON.stringify(params));
+      if(wh)fd.append('webhook_url',wh);
+      const vu=$('#videoUrl').value.trim();if(!vu){toast('Please enter a video URL','error');return}
+      fd.append('video_url',vu);
+      const iu=$('#imageUrl')?.value?.trim();if(PIPES[S.pipeline].imageUrl&&iu)fd.append('image_url',iu);
+      const resp=await fetch('/api/submit',{method:'POST',body:fd});
+      const data=await resp.json();
+      if(data.error){const m=(typeof data.detail==='string'?data.detail:data.error)||'';toast(m.slice(0,120)+(m.length>120?'...':''),'error');return}
+      toast(`Job queued: ${data.job_id?.slice(0,8)}...`,'success');
+      S.jobs.unshift(data);saveJobs();renderJobs();startPolling(data.job_id);
     } else {
       const v=$('#videoInput').files[0];if(!v){toast('Please select a video file','error');return}
-      fd.append('file',v);
-      const bi=$('#bgImageInput').files[0];if(bi)fd.append('background_file',bi);
-      const bv=$('#bgVideoInput').files[0];if(bv)fd.append('background_video',bv);
+      const bi=$('#bgImageInput').files[0];
+      const bv=$('#bgVideoInput').files[0];
       const mf=$('#maskInput').files[0]||$('#maskInlineInput').files[0];
-      if(mf)fd.append('mask_file',mf);
-      else if(PIPES[S.pipeline].canvas){const mb=await exportMask();if(mb)fd.append('mask_file',mb,'selection_mask.png')}
-    }
+      let maskBlob=null;
+      if(!mf&&PIPES[S.pipeline].canvas){maskBlob=await exportMask()}
+      // Calculate total upload size
+      let totalSize=v.size+(bi?bi.size:0)+(bv?bv.size:0)+(mf?mf.size:0)+(maskBlob?maskBlob.size:0);
 
-    const resp=await fetch('/api/submit',{method:'POST',body:fd});
-    const data=await resp.json();
-    if(data.error){const m=(typeof data.detail==='string'?data.detail:data.error)||'';toast(m.slice(0,120)+(m.length>120?'...':''),'error');return}
-    toast(`Job queued: ${data.job_id?.slice(0,8)}...`,'success');
-    S.jobs.unshift(data);saveJobs();renderJobs();startPolling(data.job_id);
+      let data;
+      if(totalSize>MAX_PROXY_SIZE){
+        // Large upload — go direct to platform API, bypassing Vercel proxy
+        toast('Large file detected — uploading directly...','info');
+        const kr=await fetch('/api/upload-key');const kd=await kr.json();
+        if(kd.error){toast(kd.error,'error');return}
+        const fd=new FormData();
+        fd.append('pipeline',S.pipeline);
+        fd.append('corridorkey_params',JSON.stringify(params));
+        if(wh)fd.append('webhook_url',wh);
+        fd.append('file',v);
+        if(bi)fd.append('background_file',bi);
+        if(bv)fd.append('background_video',bv);
+        if(mf)fd.append('mask_file',mf);
+        else if(maskBlob)fd.append('mask_file',maskBlob,'selection_mask.png');
+        const resp=await fetch(kd.base+'/upload',{method:'POST',headers:{'X-Api-Key':kd.key},body:fd});
+        data=await resp.json();
+      } else {
+        // Small upload — proxy through Vercel
+        const fd=new FormData();
+        fd.append('pipeline',S.pipeline);fd.append('mode','upload');
+        fd.append('corridorkey_params',JSON.stringify(params));
+        if(wh)fd.append('webhook_url',wh);
+        fd.append('file',v);
+        if(bi)fd.append('background_file',bi);
+        if(bv)fd.append('background_video',bv);
+        if(mf)fd.append('mask_file',mf);
+        else if(maskBlob)fd.append('mask_file',maskBlob,'selection_mask.png');
+        const resp=await fetch('/api/submit',{method:'POST',body:fd});
+        data=await resp.json();
+      }
+      if(data.error){const m=(typeof data.detail==='string'?data.detail:data.error)||'';toast(m.slice(0,120)+(m.length>120?'...':''),'error');return}
+      toast(`Job queued: ${data.job_id?.slice(0,8)}...`,'success');
+      S.jobs.unshift(data);saveJobs();renderJobs();startPolling(data.job_id);
+    }
     $$('.dropzone-name').forEach(e=>e.textContent='');$$('.dropzone-size').forEach(e=>e.textContent='');
   } catch(err){toast(err.message,'error')} finally {btn.disabled=false;btn.textContent='Submit Job'}
 }
@@ -1011,7 +1051,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('#videoInput').addEventListener('change',()=>{const f=$('#videoInput').files[0];if(f)loadFrame(f)});
 
   initCanvas();
-  $('#mainForm').addEventListener('submit',submitJob);
+  $('#submitBtn').addEventListener('click',submitJob);
   S.jobs.forEach(j=>{if(['queued','processing','running'].includes(j.status))startPolling(j.job_id)});
   renderParams();updateUI();renderJobs();
 });
